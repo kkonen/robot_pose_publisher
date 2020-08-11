@@ -33,16 +33,14 @@ int main(int argc, char ** argv)
   double publish_frequency;
   bool is_stamped;
   ros::Publisher p_pub;
+  ros::Publisher p_pub_stamped;
 
   nh_priv.param<std::string>("map_frame",map_frame,"/map");
   nh_priv.param<std::string>("base_frame",base_frame,"/base_link");
   nh_priv.param<double>("publish_frequency",publish_frequency,10);
-  nh_priv.param<bool>("is_stamped", is_stamped, false);
 
-  if(is_stamped)
-    p_pub = nh.advertise<geometry_msgs::PoseStamped>("robot_pose", 1);
-  else 
-    p_pub = nh.advertise<geometry_msgs::Pose>("robot_pose", 1);
+  p_pub = nh.advertise<geometry_msgs::Pose>("robot_pose", 1);
+  p_pub_stamped = nh.advertise<geometry_msgs::PoseStamped>("robot_stamped_pose", 1);
 
   // create the listener
   tf::TransformListener listener;
@@ -70,10 +68,8 @@ int main(int argc, char ** argv)
       pose_stamped.pose.position.y = transform.getOrigin().getY();
       pose_stamped.pose.position.z = transform.getOrigin().getZ();
 
-      if(is_stamped)
-        p_pub.publish(pose_stamped);
-      else
-        p_pub.publish(pose_stamped.pose);
+      p_pub.publish(pose_stamped.pose);
+      p_pub_stamped.publish(pose_stamped);
     }
     catch (tf::TransformException &ex)
     {
